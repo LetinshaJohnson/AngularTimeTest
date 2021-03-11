@@ -13,6 +13,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { AuthGuard } from '../authentication/auth.guard';
+import { RandomGuard } from '../authentication/random.guard';
+import { AuthService } from '../authentication/authentication.service';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { TokenInterceptor } from '../authentication/token.interceptor';
 @NgModule({
   declarations: [
     Page500Component,
@@ -21,6 +26,16 @@ import { MatButtonModule } from '@angular/material/button';
     SignupComponent,
     LockedComponent,
     ForgotPasswordComponent
+  ],
+  providers:[
+    AuthGuard,
+    RandomGuard,
+    AuthService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TokenInterceptor,
+      multi:true
+    }
   ],
   imports: [
     CommonModule,
