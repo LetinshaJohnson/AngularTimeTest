@@ -37,11 +37,11 @@ export class SigninComponent implements OnInit {
     if (this.loginForm.invalid) {
       return;
     } else {
-      
+      //this.router.navigate(['/calendar']);
       this.authService.getAuthentication(this.loginForm.value.email, this.loginForm.value.password)
         .subscribe(success => {
           if (success) {
-            this.sessiondata = sessionStorage.getItem("role");
+            //this.sessiondata = sessionStorage.getItem("role");
             //console.log(sessionStorage.getItem("role"));
             this.router.navigate(['/calendar']);
           }

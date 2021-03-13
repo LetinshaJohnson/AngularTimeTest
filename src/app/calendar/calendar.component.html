@@ -8,6 +8,29 @@
                             <div class="col-md-10">
                                 <h4>Calendar</h4>
                             </div>
+                            <div class="col-md-2">
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                    <ul class="nav navbar-nav navbar-right">
+                                        <li class="dropdown user_profile">
+                                            <a href="#" onClick="return false;" data-toggle="dropdown" role="button" class="pt-0">
+                                                <img src="assets/images/avatar2.png" class="rounded-circle" width="32" height="32" alt="User">
+                                            </a>
+                                            <ul class="dropdown-menu pullDown">
+                                                <li>
+                                                    <ul class="user_dw_menu">
+                                                        <li>
+                                                            <a routerLink="/authentication/signin" (click)="onLogout()">
+                                                                <mat-icon aria-hidden="false" class="mr-2 ">power_settings_new
+                                                                </mat-icon>Logout
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="card-body">
@@ -36,7 +59,7 @@
                                         right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'  
                                       }" [plugins]="calendarPlugins" [weekends]="calendarWeekends"
                                         (eventRender)="handleEventRender($event)" (eventClick)="eventClick($event)"
-                                        [events]="calendarEvents" (dateClick)="addNewEvent()">
+                                        [events]="calendarEvents" >
                                     </full-calendar>
                                 </div>
                             </div>

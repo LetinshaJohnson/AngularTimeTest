@@ -11,6 +11,7 @@ import { PageLoaderComponent } from './page-loader/page-loader.component';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { CalendarService } from '../app/calendar/calendar.service';
 import { NgxSpinnerModule } from 'ngx-spinner';
+import {NgxMaterialTimepickerModule} from 'ngx-material-timepicker';
 import {
   PerfectScrollbarModule,
   PERFECT_SCROLLBAR_CONFIG,
@@ -131,6 +132,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     NgxMatDatetimePickerModule,
     NgxMatTimepickerModule,
     MatRadioModule,
+    NgxMaterialTimepickerModule,
     DragulaModule.forRoot(),
     AgmCoreModule.forRoot({
       apiKey: 'YOUR API KEY',

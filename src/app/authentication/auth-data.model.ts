@@ -1,6 +1,12 @@
 export interface AuthData{
-    email:String;
-    password:String;
+    user_email:String;
+    user_password:String;
+}
+export interface RegisterUser{
+    user_first_name:String;
+    user_last_name:String;
+    user_email:String;
+    user_password:String;
 }
 export interface RequestData {
     email: string;

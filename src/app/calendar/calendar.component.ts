@@ -13,12 +13,27 @@ import { MatRadioChange } from '@angular/material/radio';
 import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { CalendarService } from './calendar.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { CalendarData, UserCalendarData } from '../data-model/calendar-data.model';
+import { environment } from '../../environments/environment';
+import { AuthService } from '../authentication/authentication.service';
 
 const d = new Date();
 const day = d.getDate();
 const month = d.getMonth();
 const year = d.getFullYear();
-
+console.log(sessionStorage.getItem("user_id"));
+export interface EventList {
+  0: [{
+    id: string;
+    title: string;
+    start: any;
+    end: any;
+    className: string;
+    groupId: string;
+    details: string;
+  }];
+}
 @Component({
   selector: 'app-calendar',
   templateUrl: './calendar.component.html',
@@ -29,8 +44,10 @@ export class CalendarComponent implements OnInit {
   calendar: Calendar | null;
   public addCusForm: FormGroup;
   dialogTitle: string;
+  public eventList: EventList[];
   filterOptions = "All";
   calendarData: any;
+  dialogData: any;
 
   public filters = [
     { name: 'all', value: 'All', checked: 'true' },
@@ -54,6 +71,9 @@ export class CalendarComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
+    private httpClient: HttpClient,
+    private http: HttpClient,
+    public authService: AuthService,
     public calendarService: CalendarService,
     private snackBar: MatSnackBar) {
     this.dialogTitle = 'Add New Event';
@@ -64,12 +84,7 @@ export class CalendarComponent implements OnInit {
 
   public ngOnInit(): void {
 
-    this.calendarEvents = this.events();
-    this.tempEvents = this.calendarEvents;
-    // you can also get events from json file using following code
-    // this.calendarService.getAllCalendars().subscribe((data: Calendar[]) => {
-    //   this.calendarEvents = data;
-    // })
+    this.events();
   }
 
   createContactForm(calendar): FormGroup {
@@ -80,6 +95,7 @@ export class CalendarComponent implements OnInit {
         [Validators.required, Validators.pattern('[a-zA-Z]+([a-zA-Z ]+)*')]
       ],
       category: [calendar.category],
+      mode: [calendar.mode],
       startDate: [calendar.startDate,
       [Validators.required]
       ],
@@ -104,38 +120,26 @@ export class CalendarComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
 
-      if (result === "submit") {
-        this.calendarData = this.calendarService.getDialogData();
-        this.calendarEvents = this.calendarEvents.concat({ // add new event data. must create new array
-          id: this.calendarData.id,
-          title: this.calendarData.title,
-          start: this.calendarData.startDate,
-          end: this.calendarData.endDate,
-          className: this.calendarData.category,
-          groupId: this.calendarData.category,
-          details: this.calendarData.details,
-        })
-        this.addCusForm.reset();
-        this.showNotification(
-          'snackbar-success',
-          'Add Record Successfully...!!!',
-          'bottom',
-          'center'
-        );
-      }
+      this.addCusForm.reset();
+        this.ngOnInit();
     });
   }
+
+
   eventClick(row) {
+    
+    console.log(row.event);
     const calendarData: any = {
       id: row.event.id,
       title: row.event.title,
       category: row.event.groupId,
       startDate: row.event.start,
-      endDate: row.event.end,
-      details: row.event.extendedProps.details
+      endDate: row.event.start,
+      mode: row.event.extendedProps.mode,
+      details: row.event.extendedProps.details,
+      event_id: row.event.extendedProps.event_id
     };
-
-
+    // console.log(calendarData);
     const dialogRef = this.dialog.open(FormDialogComponent, {
       data: {
         calendar: calendarData,
@@ -144,34 +148,8 @@ export class CalendarComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result === "submit") {
-        this.calendarData = this.calendarService.getDialogData();
-        this.calendarEvents.forEach(function (element, index) {
-          if (this.calendarData.id === element.id) {
-            this.editEvent(index, this.calendarData);
-          }
-        }, this);
-        this.showNotification(
-          'black',
-          'Edit Record Successfully...!!!',
-          'bottom',
-          'center'
-        );
-        this.addCusForm.reset();
-      } else if (result === "delete") {
-        this.calendarData = this.calendarService.getDialogData();
-        this.calendarEvents.forEach(function (element, index) {
-          if (this.calendarData.id === element.id) {
-            this.filterEvent(element);
-          }
-        }, this);
-        this.showNotification(
-          'snackbar-danger',
-          'Delete Record Successfully...!!!',
-          'bottom',
-          'center'
-        );
-      }
+      this.addCusForm.reset();
+        this.ngOnInit();
     });
   }
   editEvent(eventIndex, calendarData) {
@@ -239,118 +217,51 @@ export class CalendarComponent implements OnInit {
 
     return className;
   }
-  events() {
-    return [
-      {
-        id: "event1",
-        title: "All Day Event",
-        start: new Date(year, month, 1, 0, 0),
-        end: new Date(year, month, 1, 23, 59),
-        className: "fc-event-success",
-        groupId: "work",
-        details:
-          "Her extensive perceived may any sincerity extremity. Indeed add rather may pretty see.",
-      },
-      {
-        id: "event2",
-        title: "Break",
-        start: new Date(year, month, day + 28, 16, 0),
-        end: new Date(year, month, day + 29, 20, 0),
-        allDay: false,
-        className: "fc-event-primary",
-        groupId: "important",
-        details:
-          "Her extensive perceived may any sincerity extremity. Indeed add rather may pretty see. ",
-      },
-      {
-        id: "event3",
-        title: "Shopping",
-        start: new Date(year, month, day + 4, 12, 0),
-        end: new Date(year, month, day + 4, 20, 0),
-        allDay: false,
-        className: "fc-event-warning",
-        groupId: "personal",
-        details:
-          "Her extensive perceived may any sincerity extremity. Indeed add rather may pretty see. ",
-      },
-      {
-        id: "event4",
-        title: "Meeting",
-        start: new Date(year, month, day + 14, 10, 30),
-        end: new Date(year, month, day + 16, 20, 0),
-        allDay: false,
-        className: "fc-event-success",
-        groupId: "work",
-        details:
-          "Her extensive perceived may any sincerity extremity. Indeed add rather may pretty see.",
-      },
-      {
-        id: "event5",
-        title: "Lunch",
-        start: new Date(year, month, day, 11, 0),
-        end: new Date(year, month, day, 14, 0),
-        allDay: false,
-        className: "fc-event-primary",
-        groupId: "important",
-        details:
-          "Her extensive perceived may any sincerity extremity. Indeed add rather may pretty see.",
-      },
-      {
-        id: "event6",
-        title: "Meeting",
-        start: new Date(year, month, day + 2, 12, 30),
-        end: new Date(year, month, day + 2, 14, 30),
-        allDay: false,
-        className: "fc-event-success",
-        groupId: "work",
-        details:
-          "Her extensive perceived may any sincerity extremity. Indeed add rather may pretty see.",
-      },
-      {
-        id: "event7",
-        title: "Birthday Party",
-        start: new Date(year, month, day + 17, 19, 0),
-        end: new Date(year, month, day + 17, 19, 30),
-        allDay: false,
-        className: "fc-event-warning",
-        groupId: "personal",
-        details:
-          "Her extensive perceived may any sincerity extremity. Indeed add rather may pretty see.",
-      },
-      {
-        id: "event8",
-        title: "Go to Delhi",
-        start: new Date(year, month, day + -5, 10, 0),
-        end: new Date(year, month, day + -4, 10, 30),
-        allDay: false,
-        className: "fc-event-danger",
-        groupId: "travel",
-        details:
-          "Her extensive perceived may any sincerity extremity. Indeed add rather may pretty see.",
-      },
-      {
-        id: "event9",
-        title: "Get To Gather",
-        start: new Date(year, month, day + 6, 10, 0),
-        end: new Date(year, month, day + 7, 10, 30),
-        allDay: false,
-        className: "fc-event-info",
-        groupId: "friends",
-        details:
-          "Her extensive perceived may any sincerity extremity. Indeed add rather may pretty see.",
-      },
-      {
-        id: "event10",
-        title: "Collage Party",
-        start: new Date(year, month, day + 20, 10, 0),
-        end: new Date(year, month, day + 20, 10, 30),
-        allDay: false,
-        className: "fc-event-info",
-        groupId: "friends",
-        details:
-          "Her extensive perceived may any sincerity extremity. Indeed add rather may pretty see.",
-      },
-    ];
+  createModel(x: EventList) {
+    console.log(x[0]);
+  }
+  events(): any {
+    const authorization = { Authorization: `${sessionStorage.getItem("authorization")}` };
+    const calendarData: UserCalendarData = { authorization: authorization, user_id: sessionStorage.getItem("user_id") };
+    console.log(calendarData);
+    var list;
+    // return this.httpClient.post<any>(environment.apiBaseURL + 'calendar/get_all', calendarData);
+    this.httpClient.post<any>(environment.apiBaseURL + 'calendar/get_all', calendarData)
+      .subscribe(
+        (data) => {
+          this.calendarEvents = data.result;
+          // console.log(data.result);
+
+          this.tempEvents = this.calendarEvents;
+          list = data.result.map(function (dd) {
+            return {
+              id: dd.schedule_id,
+              title: dd.title,
+              start: dd.issuedDt,
+              end: dd.issuedDt,
+              className: dd.classN,
+              groupId: dd.category,
+              details: dd.details,
+              mode: dd.mode,
+              event_id: dd.event_id
+            };
+          });
+          // console.log(list);
+
+          this.calendarEvents = list;
+          this.tempEvents = this.calendarEvents;
+        }
+      );
+  }
+  onLogout() {
+    //alert("yss");
+    sessionStorage.clear();
+    this.authService.logout()
+      .subscribe(success => {
+        console.log(success);
+        if (success) {
+          
+        }
+      });
   }
 }
-

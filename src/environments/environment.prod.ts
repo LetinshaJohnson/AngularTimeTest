@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
   name:"Time-Schedule",
-  apiBaseURL:"https://localhost:8000/"
+  apiBaseURL:"http://localhost:8000/"
 };
