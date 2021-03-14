@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { UserData } from '../data-model/user.model';
-import { AuthData, RegisterUser, RequestData, EmailCheck, changePassword, changeUsername, UserOne } from './auth-data.model';
+import { AuthData, RegisterUser, UserOne } from './auth-data.model';
 import { catchError, mapTo, tap } from 'rxjs/operators';
 import { AuthenticationClass, RootObject } from '../classes/auth';
 import { Token } from '../classes/token';
